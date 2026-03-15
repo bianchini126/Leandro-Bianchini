@@ -1,0 +1,5 @@
+{
+  "name": "IronPulse AI",
+  "description": "Treinador inteligente com feedback tátil e vídeos de execução para máxima performance.",
+  "requestFramePermissions": ["geolocation"]
+}
