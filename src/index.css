@@ -1,56 +1,100 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;600;800;900&display=swap');
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-forge-orange: #00F2FF; /* IronPulse Cyan */
-  --color-forge-black: #050505;
-  --color-forge-gray: #0F0F0F;
-  --color-forge-zinc: #1A1A1A;
+  /* Premium IronPulse Color Palette */
+  --color-forge-orange: #00E5FF; /* IronPulse Cyan Accent */
+  --color-forge-cyan-glow: rgba(0, 229, 255, 0.4);
+  --color-forge-black: #030303;
+  --color-forge-gray: #0A0A0A;
+  --color-forge-zinc: #121212;
+  --color-forge-glass: rgba(18, 18, 18, 0.65);
 }
 
 :root {
   background-color: var(--color-forge-black);
-  color: white;
+  color: #FAFAFA;
 }
 
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Base App Background - immersive dark */
+.app-bg {
+  background: radial-gradient(circle at 50% -20%, #152230 0%, var(--color-forge-black) 40%, var(--color-forge-black) 100%);
+  min-height: 100vh;
+}
+
+/* Premium Glassmorphism Card */
 .glass-card {
-  background: rgba(26, 26, 26, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--color-forge-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border-radius: 1.25rem;
+}
+
+/* Interactive Input Styling */
+.glass-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  color: white;
+  transition: all 0.3s ease;
+}
+.glass-input:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--color-forge-orange);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+  outline: none;
 }
 
 .cyan-glow {
-  box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+  box-shadow: 0 0 25px var(--color-forge-cyan-glow);
 }
 
 .text-gradient {
-  background: linear-gradient(to right, #00F2FF, #0077FF);
+  background: linear-gradient(135deg, #00FFD1 0%, #0088FF 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Dynamic Gradients for buttons */
+.btn-gradient {
+  background: linear-gradient(135deg, #00FFD1 0%, #0088FF 100%);
+  color: #000;
+  font-weight: 600;
+  border: none;
+  transition: all 0.3s ease;
+}
+.btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 136, 255, 0.4);
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--color-forge-black); }
+::-webkit-scrollbar-thumb { 
+  background: #222; 
+  border-radius: 10px; 
 }
-::-webkit-scrollbar-track {
-  background: var(--color-forge-black);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-forge-zinc);
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-forge-orange);
+::-webkit-scrollbar-thumb:hover { background: var(--color-forge-orange); }
+
+/* Typography Overrides */
+.heading-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
 .markdown-body h1, .markdown-body h2, .markdown-body h3 {
@@ -60,23 +104,7 @@ body {
   margin-bottom: 0.5rem;
   color: var(--color-forge-orange);
 }
-
-.markdown-body p {
-  margin-bottom: 1rem;
-  line-height: 1.6;
-  color: #D1D1D1;
-}
-
-.markdown-body ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.markdown-body li {
-  margin-bottom: 0.5rem;
-}
-
-.markdown-body strong {
-  color: white;
-}
+.markdown-body p { margin-bottom: 1rem; line-height: 1.6; color: #D1D1D1; }
+.markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+.markdown-body li { margin-bottom: 0.5rem; }
+.markdown-body strong { color: white; }

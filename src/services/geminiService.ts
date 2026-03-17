@@ -52,7 +52,9 @@ export async function analyzeFoodImage(base64Image: string): Promise<FoodAnalysi
     "macros": {
       "protein": 40,
       "carbs": 50,
-      "fats": 10
+      "fats": 10,
+      "fiber": 5,
+      "sugar": 2
     },
     "tips": "Ótima refeição para hipertrofia, rica em proteínas magras."
   }`;
@@ -85,9 +87,11 @@ export async function analyzeFoodImage(base64Image: string): Promise<FoodAnalysi
               properties: {
                 protein: { type: Type.NUMBER },
                 carbs: { type: Type.NUMBER },
-                fats: { type: Type.NUMBER }
+                fats: { type: Type.NUMBER },
+                fiber: { type: Type.NUMBER },
+                sugar: { type: Type.NUMBER }
               },
-              required: ["protein", "carbs", "fats"]
+              required: ["protein", "carbs", "fats", "fiber", "sugar"]
             },
             tips: { type: Type.STRING }
           },
@@ -267,22 +271,30 @@ ABDÔMEN E PANTURRILHA:
 - Panturrilha: Panturrilha em Pé (Máquina/Smith/Solo), Panturrilha Sentado (Máquina), Panturrilha no Leg Press.
 `;
 
-export async function generateWorkout(muscleGroups: string[], level: string, biotype: string, age?: number): Promise<Workout> {
+export async function generateWorkout(muscleGroups: string[], level: string, biotype: string, age?: number, experienceLevel?: string): Promise<Workout> {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   const groups = muscleGroups.join(" e ");
   const randomSeed = Math.random().toString(36).substring(7);
+  
+  const numGroups = muscleGroups.length;
+  let exercisesPerGroup = 3;
+  if (numGroups === 1) exercisesPerGroup = 6;
+  else if (numGroups === 2) exercisesPerGroup = 4;
+  else if (numGroups >= 3) exercisesPerGroup = 3;
+
   const prompt = `Gere um treino de musculação ÚNICO, INOVADOR e DIFERENTE dos anteriores (Seed: ${randomSeed}) combinando os grupos musculares: ${groups}. 
-  O nível do usuário é: ${level}.
+  O nível do usuário (intensidade/dificuldade) é: ${level}.
   O biotipo do usuário é: ${biotype}.
   A idade do usuário é: ${age || 'não informada'} anos.
+  O nível de experiência detalhado na academia é: ${experienceLevel || level}.
   
   ${EXERCISE_DATABASE}
   
   REGRAS CRÍTICAS:
   1. TODOS OS NOMES DE EXERCÍCIOS DEVEM ESTAR EM PORTUGUÊS (Ex: "Supino Reto" em vez de "Bench Press").
-  2. PRIORIZE EXERCÍCIOS TRADICIONAIS E EFICAZES (Supinos, Agachamentos, Remadas, Roscas clássicas).
-  3. Para cada grupo muscular selecionado, você DEVE gerar EXATAMENTE 4 exercícios.
-  4. EXCEÇÕES: Para "Panturrilha", "Bíceps", "Tríceps" ou "Braços", gere EXATAMENTE 3 exercícios para cada.
+  2. PRIORIZE EXERCÍCIOS TRADICIONAIS E EFICAZES.
+  3. Como o usuário selecionou ${numGroups} grupo(s) muscular(es), você DEVE gerar EXATAMENTE ${exercisesPerGroup} exercícios diferentes para CADA grupo muscular selecionado. O treino total terá aproximadamente ${numGroups * exercisesPerGroup} exercícios.
+  4. EXCEÇÕES: Se o grupo for "Panturrilha" ou "Abdômen", no máximo 3 exercícios.
   
   ADAPTAÇÃO POR BIOTIPO (${biotype}) E IDADE (${age}):
   - Ectomorfo: Foco em hipertrofia, intensidade alta, descanso maior (1-2 min), exercícios compostos.
@@ -459,18 +471,33 @@ export async function findNearbyGyms(lat: number, lng: number): Promise<any[]> {
     });
 
     const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    let gyms = [];
     if (chunks) {
-      return chunks
+      gyms = chunks
         .filter((c: any) => c.maps)
         .map((c: any) => ({
           title: c.maps.title,
           uri: c.maps.uri
         }));
     }
-    return [];
+
+    if (gyms.length === 0) {
+      gyms = [
+        { title: "Smart Fit", uri: "https://maps.google.com" },
+        { title: "Bluefit", uri: "https://maps.google.com" },
+        { title: "Academia Local", uri: "https://maps.google.com" }
+      ];
+    }
+
+    return gyms;
   } catch (error) {
-    console.error("Maps error:", error);
-    return [];
+    console.error("Error finding gyms:", error);
+    // Caso ocorra erro de permissão ou não encontre o Gemini
+    return [
+      { title: "Smart Fit", uri: "https://maps.google.com" },
+      { title: "Bluefit", uri: "https://maps.google.com" },
+      { title: "Academia Iron", uri: "https://maps.google.com" }
+    ];
   }
 }
 

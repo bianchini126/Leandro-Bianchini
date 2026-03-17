@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { ArrowLeft, Save, Plus, Trash2, Dumbbell } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { dbService } from '../services/dbService';
 
 interface WorkoutBuilderProps {
-  token: string;
-  studentId: number;
+  studentEmail: string;
   onBack: () => void;
   staticExercises: { id: number; name: string; muscle: string }[];
 }
 
-export function WorkoutBuilder({ token, studentId, onBack, staticExercises }: WorkoutBuilderProps) {
+export function WorkoutBuilder({ studentEmail, onBack, staticExercises }: WorkoutBuilderProps) {
   const [exercises, setExercises] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -21,18 +21,13 @@ export function WorkoutBuilder({ token, studentId, onBack, staticExercises }: Wo
 
   useEffect(() => {
     fetchWorkout();
-  }, [studentId]);
+  }, [studentEmail]);
 
   const fetchWorkout = async () => {
     try {
-      const res = await fetch(`/api/trainer/workout/${studentId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.exercicios) {
-          setExercises(data.exercicios);
-        }
+      const data = await dbService.getWorkouts(studentEmail);
+      if (data && data.length > 0) {
+        setExercises(data[0].exercicios || []);
       }
     } catch (e) {
       console.error(e);
@@ -62,23 +57,12 @@ export function WorkoutBuilder({ token, studentId, onBack, staticExercises }: Wo
   const handleSave = async () => {
     setSaving(true);
     try {
-      const res = await fetch('/api/trainer/workout', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({ studentId, exercicios: exercises })
-      });
-      if (res.ok) {
-        alert('Treino salvo com sucesso!');
-        onBack();
-      } else {
-        alert('Erro ao salvar treino.');
-      }
+      await dbService.prescribeWorkout(studentEmail, { exercicios: exercises });
+      alert('Treino salvo com sucesso!');
+      onBack();
     } catch (e) {
       console.error(e);
-      alert('Erro na conexão.');
+      alert('Erro ao salvar treino no Firebase.');
     } finally {
       setSaving(false);
     }
